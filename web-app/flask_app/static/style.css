@@ -1,0 +1,53 @@
+body {
+        background-color: #f8f9fe;
+        font-family: 'Open Sans', sans-serif;
+    }
+
+.card-custom {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+    background: white;
+}
+.led {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    margin: 10px;
+    transition: 0.3s;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.led.off {
+    opacity: 0.2;
+    filter: grayscale(80%);
+    box-shadow: none;
+}
+
+.led.on {
+    opacity: 1;
+    filter: none;
+    box-shadow: 0 0 25px 8px currentColor;
+}
+
+.led.red {
+    background-color: #ff0033;
+    color: #ff0033;
+}
+
+.led.green {
+    background-color: #00e676;
+    color: #00e676;
+}
+
+.led.blue {
+    background-color: #2979ff;
+    color: #2979ff;
+}
+
+.led-label {
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #32325d;
+}
