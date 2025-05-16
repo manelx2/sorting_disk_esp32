@@ -1,4 +1,7 @@
+// #include <ESPAsyncWebServer.h>
+
 #include <ESP32Servo.h>
+
 // Define LED pins
 const int led1 = 4;
 const int led2 = 5;
@@ -23,7 +26,7 @@ int servoAngle = 0;        // Default angle
 #include <WebServer.h>
 const char* ssid = "Connexion ";
 const char* password = "12345678";
-
+String data_get = "";
 WebServer server(80);
 void handlePost() {
   if (server.hasArg("choix") && server.hasArg("move") && server.hasArg("type")) {
@@ -40,14 +43,13 @@ void handlePost() {
     json += "\"LED\":" + String(ledChoice) + ",";
     json += "\"Servo angle\":" + String(servoAngle);
     json += "}";
+    data_get=json;
     server.send(200, "application/json", json);
   } else {
     server.send(400, "text/plain", "Missing parameters");
   }
   
 }
-
-
 // Function to control the servo
 void controlServo(bool move, bool type) {
   if (!move && type) {
@@ -111,6 +113,14 @@ void setup() {
   Serial.println(WiFi.localIP());  // Note this IP for the Python script
 
   server.on("/data", HTTP_POST, handlePost);
+
+  // to read on the wifi.py
+ server.on("/status", HTTP_GET, []() {
+  // String json = "{\"message\":\"OK\",\"Motor speed\":255,\"LED\":1,\"Servo angle\":90}";
+  server.send(200, "application/json", data_get);
+});
+
+
   server.begin();
   
 

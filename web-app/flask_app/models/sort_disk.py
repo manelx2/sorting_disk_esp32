@@ -1,17 +1,22 @@
 import cv2
 import numpy as np
 import requests
-esp_ip = "http://192.168.116.29/data"  
-dashboard_ip= "http://127.0.0.1:5000"
+# Imports of updated motor params
+# from ..controllers.main import update_conveyor, update_servo
+
+esp_ip = "http://192.168.3.29/data"  
+dashboard_ip= "http://192.168.1.100:5000"
 
 # variable to be read from server
 angle=0
 speed=0
+# print(update_servo())
+# print(update_conveyor())
 # ---------------------------------------------------------------------
 
 
 # Start camera
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 # Define HSV ranges
 lower_green = np.array([35, 60, 60])
@@ -19,6 +24,8 @@ upper_green = np.array([85, 255, 255])
 
 lower_blue = np.array([110, 100, 30])
 upper_blue = np.array([135, 255, 255])
+
+data_exported={}
 
 while True:
     ret, frame = cap.read()
@@ -81,29 +88,32 @@ while True:
         break
     angle=100
     speed=255
+    # angle=servo_angle_updated
+    # speed=conveyor_speed_updated
     #----------------------------------------------------------this is where we connect to the dashbord-----------------------------
-    payload2 = {
-        'LedChoice':led,
-        'move': int(no_disk),   
-        'type': int(disk_color==2),
-        'speed':motor_speed,
-        'angle':servo_angle
-    }
-    try:
-        response2=requests.post(dashboard_ip,data2=payload2, timeout=5)
+    # payload2 = {
+    #     'LedChoice':led,
+    #     'move': int(no_disk),   
+    #     'type': int(disk_color==2),
+    #     'speed':motor_speed,
+    #     'angle':servo_angle
+    # }
+    # data2=[]
+    # try:
+    #     response2=requests.post(dashboard_ip,data2=payload2, timeout=5)
 
-        if response2.status_code == 200:
-            speed = data2.get("Motor speed")
-            angle = data2.get("Servo angle")
+    #     if response2.status_code == 200:
+    #         speed = data2.get("Motor speed")
+    #         angle = data2.get("Servo angle")
 
-            print("dashboard speed:", speed)
-            print("dashboard speed:", angle)
-        else:
-            print("Failed to get valid response. Status Code:", response2.status_code)
+    #         print("dashboard speed:", speed)
+    #         print("dashboard speed:", angle)
+    #     else:
+    #         print("Failed to get valid response. Status Code:", response2.status_code)
 
-    except requests.exceptions.RequestException as e:
-        print("Error connecting to dashboard:", e)
-    #--------------------------------------------------------esp32-----------------------------------------
+    # except requests.exceptions.RequestException as e:
+    #     print("Error connecting to dashboard:", e)
+    # #--------------------------------------------------------esp32-----------------------------------------
     payload = {
         'choix':disk_color,
         'move': int(no_disk),   # convert to 1/0
@@ -111,7 +121,8 @@ while True:
         'speed':speed,
         'angle':angle
     }
-    #----------------------------------------------           ->     ----------------------------------
+    
+    # #----------------------------------------------           ->     ----------------------------------
     #----------------------------------------------sort-disk  <-  esp----------------------------------
     try:
         response = requests.post(esp_ip, data=payload, timeout=5)  
@@ -128,11 +139,12 @@ while True:
             print("Motor Speed:", motor_speed)
             print("LED:", led)
             print("Servo Angle:", servo_angle)
+            data_exported=data
         else:
             print("Failed to get valid response. Status Code:", response.status_code)
 
     except requests.exceptions.RequestException as e:
         print("Error connecting to ESP32:", e)
-    
+# print("data printed",data_exported)   
 cap.release()
 cv2.destroyAllWindows()
