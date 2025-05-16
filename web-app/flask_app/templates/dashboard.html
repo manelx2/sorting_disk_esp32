@@ -16,15 +16,15 @@
             <h4 class="mb-4">System LED Status</h4>
             <div class="d-flex justify-content-around align-items-center">
                 <div>
-                <div class="led red {% if ledOn != 'red' %}off{% else %}on{% endif %}"></div>
+                <div class="led red {% if ledOn != 3 %}off{% else %}on{% endif %}"></div>
                 <div class="led-label">Red</div>
                 </div>
                 <div>
-                <div class="led green {% if ledOn != 'green' %}off{% else %}on{% endif %}"></div>
+                <div class="led green {% if ledOn != 2 %}off{% else %}on{% endif %}"></div>
                 <div class="led-label">Green</div>
                 </div>
                 <div>
-                <div class="led blue {% if ledOn != 'blue' %}off{% else %}on{% endif %}"></div>
+                <div class="led blue {% if ledOn != 1 %}off{% else %}on{% endif %}"></div>
                 <div class="led-label">Blue</div>
                 </div>
             </div>
