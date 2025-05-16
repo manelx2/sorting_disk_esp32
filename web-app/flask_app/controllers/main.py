@@ -3,6 +3,9 @@ from flask_app import app
 import random
 # Importing Dynamically the Color
 # from ....sort_disk import disk_color
+from ..models.sort_disk import data
+
+
 
 @app.route("/")
 def index():
@@ -14,6 +17,7 @@ def index():
 
 @app.route("/dashboard")
 def dashboard():
+    print(data)
     # to be removed when the import is done
     disk_color = random.choice(['red', 'green', 'blue'])
     # Static Numbers for Data Reg of Disks if Nothing yet

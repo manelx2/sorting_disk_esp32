@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import requests
 esp_ip = "http://192.168.116.29/data"  
-dashboard_ip= "http://127.0.0.1:5000"
+dashboard_ip= "http://192.168.1.100:5000"
 
 # variable to be read from server
 angle=0
@@ -89,6 +89,7 @@ while True:
         'speed':motor_speed,
         'angle':servo_angle
     }
+    data2={}
     try:
         response2=requests.post(dashboard_ip,data2=payload2, timeout=5)
 
@@ -133,6 +134,8 @@ while True:
 
     except requests.exceptions.RequestException as e:
         print("Error connecting to ESP32:", e)
-    
+print(data)
 cap.release()
 cv2.destroyAllWindows()
+
+
