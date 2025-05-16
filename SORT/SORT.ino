@@ -1,15 +1,17 @@
 #include <ESP32Servo.h>
 // Define LED pins
-const int led1 = 2;
-const int led2 = 4;
-const int led3 = 5;
+const int led1 = 4;
+const int led2 = 5;
+const int led3 = 19;
 const int speedPin = 14;  
 const int directionPin = 27;
   
 //----------------------
 int ledChoice = 1;
 bool move = false; 
-bool type= true; 
+bool type= false; 
+int speed=0;
+int angle=0;
 //----------------------
 // servo motor 
 Servo myServo;             // Servo object
@@ -19,8 +21,8 @@ int servoAngle = 0;        // Default angle
 //Wifi
 #include <WiFi.h>
 #include <WebServer.h>
-const char* ssid = "wifi_name";
-const char* password = "password";
+const char* ssid = "Connexion ";
+const char* password = "12345678";
 
 WebServer server(80);
 void handlePost() {
@@ -28,9 +30,17 @@ void handlePost() {
     ledChoice = server.arg("choix").toInt();
     move = server.arg("move").toInt();     // Convert "0"/"1" to bool
     type = server.arg("type").toInt();
+    speed= server.arg("speed").toInt();
+    angle= server.arg("angle").toInt();
 
-    Serial.printf("Received - Choix: %d, Move: %d, Type: %d\n",ledChoice, move, type);
-    server.send(200, "text/plain", "Data received");
+    Serial.printf("Received - Choix: %d, Move: %d, Type: %d ,speed: %d , Angle: %d\n",ledChoice, move, type, speed, angle);
+    String json = "{";
+    json += "\"message\":\"Data received\",";
+    json += "\"Motor speed\":" + String(speed) + ",";
+    json += "\"LED\":" + String(ledChoice) + ",";
+    json += "\"Servo angle\":" + String(servoAngle);
+    json += "}";
+    server.send(200, "application/json", json);
   } else {
     server.send(400, "text/plain", "Missing parameters");
   }
@@ -41,15 +51,13 @@ void handlePost() {
 // Function to control the servo
 void controlServo(bool move, bool type) {
   if (!move && type) {
-    servoAngle = 90;  // Turn to 90° if condition is met
+    servoAngle = angle;  
   } else {
-    servoAngle = 0;   // Stay or return to 0°
+    servoAngle = 0;   
   }
-  
   myServo.write(servoAngle);
-  Serial.print("Servo Angle: ");
-  Serial.println(servoAngle);
-
+  delay(1000);
+  myServo.write(0);
 }
 
 // Function to control LEDs
@@ -68,11 +76,12 @@ void lightUpLED(int choice) {
     digitalWrite(led3, HIGH);
   }
 }
+
 // Function to control motor
 void controlMotor(bool move) {
  if (move) {
     digitalWrite(directionPin, HIGH); // Set direction forward
-    analogWrite(speedPin, 200);     // Set motor speed
+    analogWrite(speedPin, speed);     // Set motor speed
   } else {
     analogWrite(speedPin, 0);         // Stop motor
   }
@@ -86,9 +95,8 @@ void setup() {
   pinMode(led3, OUTPUT);
   pinMode(speedPin, OUTPUT);
   pinMode(directionPin, OUTPUT);
- //----------------------------
-  myServo.setPeriodHertz(50);          // Standard 50Hz for servo
-  myServo.attach(servoPin, 500, 2400); // Typical pulse width range for servos (adjust if needed)
+ //---------------------------
+  myServo.attach(servoPin); 
   myServo.write(servoAngle);
   //-------------------------wifi
   WiFi.begin(ssid, password);
@@ -114,6 +122,7 @@ void loop() {
   // Call the function with the chosen value
   lightUpLED(ledChoice);
   controlMotor(move);
+  controlServo(move,type);
   //controlServo(move, type);
   delay(1000); 
   
