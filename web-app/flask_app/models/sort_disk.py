@@ -1,12 +1,17 @@
 import cv2
 import numpy as np
 import requests
+# Imports of updated motor params
+# from ..controllers.main import update_conveyor, update_servo
+
 esp_ip = "http://192.168.3.29/data"  
 dashboard_ip= "http://192.168.1.100:5000"
 
 # variable to be read from server
 angle=0
 speed=0
+# print(update_servo())
+# print(update_conveyor())
 # ---------------------------------------------------------------------
 
 
@@ -83,6 +88,8 @@ while True:
         break
     angle=100
     speed=255
+    # angle=servo_angle_updated
+    # speed=conveyor_speed_updated
     #----------------------------------------------------------this is where we connect to the dashbord-----------------------------
     # payload2 = {
     #     'LedChoice':led,
