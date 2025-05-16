@@ -1,6 +1,16 @@
 import cv2
 import numpy as np
 import requests
+from  motor_state import load_motor_state
+
+state = load_motor_state()
+print("Servo angle:", state['servo_angle'])
+print("Conveyor speed:", state['conveyor_speed'])
+
+# Use these values to control hardware, for example
+
+
+
 esp_ip = "http://192.168.116.29/data"  
 dashboard_ip= "http://192.168.1.100:5000"
 
@@ -134,7 +144,6 @@ while True:
 
     except requests.exceptions.RequestException as e:
         print("Error connecting to ESP32:", e)
-print(data)
 cap.release()
 cv2.destroyAllWindows()
 
