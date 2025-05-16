@@ -1,9 +1,17 @@
 import cv2
 import numpy as np
 import requests
-esp_ip = "http://IP/data"  # Replace with ESP32's IP printed on Serial
+esp_ip = "http://192.168.116.29/data"  
+dashboard_ip= "http://127.0.0.1:5000"
+
+# variable to be read from server
+angle=0
+speed=0
+# ---------------------------------------------------------------------
+
+
 # Start camera
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
 # Define HSV ranges
 lower_green = np.array([35, 60, 60])
@@ -71,17 +79,60 @@ while True:
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
+    angle=100
+    speed=255
+    #----------------------------------------------------------this is where we connect to the dashbord-----------------------------
+    payload2 = {
+        'LedChoice':led,
+        'move': int(no_disk),   
+        'type': int(disk_color==2),
+        'speed':motor_speed,
+        'angle':servo_angle
+    }
+    try:
+        response2=requests.post(dashboard_ip,data2=payload2, timeout=5)
 
+        if response2.status_code == 200:
+            speed = data2.get("Motor speed")
+            angle = data2.get("Servo angle")
 
+            print("dashboard speed:", speed)
+            print("dashboard speed:", angle)
+        else:
+            print("Failed to get valid response. Status Code:", response2.status_code)
+
+    except requests.exceptions.RequestException as e:
+        print("Error connecting to dashboard:", e)
+    #--------------------------------------------------------esp32-----------------------------------------
     payload = {
         'choix':disk_color,
         'move': int(no_disk),   # convert to 1/0
-        'type': int(disk_color==2)
+        'type': int(disk_color==2),
+        'speed':speed,
+        'angle':angle
     }
-    response = requests.post(esp_ip, data=payload)
-    print("Status:", response.status_code)
-    print("Response:", response.text)
+    #----------------------------------------------           ->     ----------------------------------
+    #----------------------------------------------sort-disk  <-  esp----------------------------------
+    try:
+        response = requests.post(esp_ip, data=payload, timeout=5)  
 
+        if response.status_code == 200:
+            data = response.json()
+            message = data.get("message")
+            motor_speed = data.get("Motor speed")
+            led = data.get("LED")
+            servo_angle = data.get("Servo angle")
 
+            print("Status:", response.status_code)
+            print("Response:", message)
+            print("Motor Speed:", motor_speed)
+            print("LED:", led)
+            print("Servo Angle:", servo_angle)
+        else:
+            print("Failed to get valid response. Status Code:", response.status_code)
+
+    except requests.exceptions.RequestException as e:
+        print("Error connecting to ESP32:", e)
+    
 cap.release()
 cv2.destroyAllWindows()
